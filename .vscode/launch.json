@@ -8,7 +8,7 @@
             "name": "gcc-9 - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "program": "${workspaceFolder}/saver",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -22,7 +22,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "C/C++: gcc-9 build active file",
+            "preLaunchTask": "compileSaver",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
