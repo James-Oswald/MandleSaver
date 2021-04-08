@@ -119,7 +119,7 @@ int main(int argc, char** argv){
         int width, height;
         glfwGetWindowSize(window, &width, &height);
         glUniform2f(uWinSize, width, height);
-        glUniform1f(uTime, 10*(clock() - begin)/(float)CLOCKS_PER_SEC);
+        glUniform1f(uTime, (clock() - begin) % CLOCKS_PER_SEC / (float)100000);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glfwSwapBuffers(window);
