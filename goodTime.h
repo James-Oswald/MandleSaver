@@ -1,6 +1,7 @@
 
 //This was made to get elapsed time rather than clock() time which always worked on windows but apparently dosn't work on Ubuntu because specifications yadayadayada
 
+#include<math.h>
 #include<stdlib.h>
 #include<sys/time.h>
 
@@ -17,4 +18,9 @@ double readTimer(){
     rv += (goodTimeEnd.tv_usec - goodTimeStart.tv_usec) / 1000.0;       //us to ms
     rv /= 1000;
     return rv;
+}
+
+//The sigmoid function
+double sigmoid(double n){
+    return 1/(1+exp(-n));
 }

@@ -13,14 +13,18 @@
 #include"window.h"      //glfw helper functions
 #include"goodTime.h"    //custom timer
 
+const double jumpTime = 3;
+const double stayTime = 4;
+const double zoomLevel = 30;
+
 GLFWwindow* window;
 clock_t begin;
 double curx = 0, cury = 0;
 double goalx = 0, goaly = 0;
 double zoom = 1, goalZoom = 1; 
-double time = 0;
+double time = 0, lastTime = 0;
 uint VAO, VBO, shaderProgram;
-uint uWinSize, uTime, uCenter;
+uint uWinSize, uTime, uCenter, uZoom;
 
 void init(){
     //Init glew so we don't need to load GL funcs by ourselves
@@ -63,6 +67,7 @@ void init(){
     uWinSize = glGetUniformLocation(shaderProgram, "windowSize");
     uTime = glGetUniformLocation(shaderProgram, "time");
     uCenter = glGetUniformLocation(shaderProgram, "center");
+    uZoom = glGetUniformLocation(shaderProgram, "zoom");
 
     //Bind the quad for the main loop
     glUseProgram(shaderProgram);    
@@ -80,7 +85,7 @@ void loop(){
 
     //load the center uniform
     double theta;
-    if(time > 5){ //find a new center to zoom in on every 10 seconds
+    if(time > jumpTime + stayTime){ //find a new center to zoom in on every few seconds
         int selection = (int)(3*((double)rand()/RAND_MAX)); //select 1 of 3 interesting areas to zoom on
         switch(selection){
             case 0: //Zoom on the stem
@@ -98,14 +103,22 @@ void loop(){
                 goalx = r * cos(theta) + 0.25;  
                 goaly = r * sin(theta);
         }
+        time = 0;
         beginTimer();
     }
+    lastTime = time;
     time = readTimer();
-    curx = (goalx - curx)/10*time + curx;
-    cury = (goaly - cury)/10*time + cury;
+    double deltat = time - lastTime;
+    curx += (goalx-curx)/fabs(jumpTime - time)*deltat;
+    cury += (goaly-cury)/fabs(jumpTime - time)*deltat; 
     glUniform2d(uCenter, curx, cury);
 
     //load the time uniform
+
+    //This forumla is motivated graphically, see https://www.desmos.com/calculator/vqac7m1j8k
+    //double timeZoom = zoomLevel*sigmoid(-fabs((zoomLevel/(0.41*stayTime)) * (time - (jumpTime + stayTime/2.5))) + zoomLevel)+1;
+    double timeZoom = zoomLevel*sigmoid((zoomLevel/jumpTime) * (time - jumpTime)) + 1;
+    glUniform1d(uZoom, timeZoom);
     glUniform1d(uTime, time);
 
     //debug via the window tyle
