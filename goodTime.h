@@ -15,5 +15,6 @@ double readTimer(){
     gettimeofday(&goodTimeEnd, NULL);
     double rv = (goodTimeEnd.tv_sec - goodTimeStart.tv_sec) * 1000.0;   //sec to ms
     rv += (goodTimeEnd.tv_usec - goodTimeStart.tv_usec) / 1000.0;       //us to ms
+    rv /= 1000;
     return rv;
 }

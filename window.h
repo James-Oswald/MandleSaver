@@ -3,11 +3,14 @@
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
 
-//#define FULLSCREEN
+#define FULLSCREEN
 
-void onResize(GLFWwindow* window, int width, int height)
-{
+void onResize(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
+}
+
+void onKeyPress(GLFWwindow* window, int key, int scancode, int action, int mods){
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
 GLFWwindow* windowInit(){
@@ -30,6 +33,7 @@ GLFWwindow* windowInit(){
     glfwMakeContextCurrent(window);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     glfwSetFramebufferSizeCallback(window, onResize);
+    glfwSetKeyCallback(window, onKeyPress);
     return window;
 }
 

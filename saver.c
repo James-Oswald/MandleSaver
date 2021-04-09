@@ -9,9 +9,9 @@
 
 #define uint unsigned int
 
-#include"shader.h"
-#include"window.h"
-#include"goodTime.h"
+#include"shader.h"      //shader program helper functions
+#include"window.h"      //glfw helper functions
+#include"goodTime.h"    //custom timer
 
 GLFWwindow* window;
 clock_t begin;
@@ -23,10 +23,13 @@ uint VAO, VBO, shaderProgram;
 uint uWinSize, uTime, uCenter;
 
 void init(){
+    //Init glew so we don't need to load GL funcs by ourselves
     if(glewInit() != GLEW_OK){
         printf("GLEW DEAD");
         exit(1);
     }
+
+    //Shader program setup
     uint vertexShader = loadShader("vert.glsl", GL_VERTEX_SHADER);
     uint fragmentShader = loadShader("frag.glsl", GL_FRAGMENT_SHADER);
     shaderProgram = loadProgram(vertexShader, fragmentShader);
@@ -45,6 +48,7 @@ void init(){
         -1,  1, // top left
     };  
 
+    //We need to set up that quad in a VBO and VAO
     glGenBuffers(1, &VBO);  
     glGenVertexArrays(1, &VAO);  
     glBindVertexArray(VAO);
@@ -55,36 +59,61 @@ void init(){
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0); 
 
+    //Get uniform locations to write to
     uWinSize = glGetUniformLocation(shaderProgram, "windowSize");
     uTime = glGetUniformLocation(shaderProgram, "time");
     uCenter = glGetUniformLocation(shaderProgram, "center");
-    glUseProgram(shaderProgram);
-    
+
+    //Bind the quad for the main loop
+    glUseProgram(shaderProgram);    
     glBindVertexArray(VAO);
 }
 
 void loop(){
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    //load the window size uniform
     int width, height;
     glfwGetWindowSize(window, &width, &height);
     glUniform2d(uWinSize, width, height);
-    if(time > 10){
-        double theta = 2*M_PI*rand()/RAND_MAX; //Pick a random theta
-        double r = (1 - cos(theta))/2;
-        goalx = r * cos(theta) + 0.25;
-        goaly = r * sin(theta);
+
+    //load the center uniform
+    double theta;
+    if(time > 5){ //find a new center to zoom in on every 10 seconds
+        int selection = (int)(3*((double)rand()/RAND_MAX)); //select 1 of 3 interesting areas to zoom on
+        switch(selection){
+            case 0: //Zoom on the stem
+                goalx = -0.5*(double)rand()/RAND_MAX - 1.5;
+                goaly = 0;
+                break;
+            case 1: //zoom on the bulb
+                theta = 2*M_PI*((double)rand()/RAND_MAX); //Pick a random angle to zoom on
+                goalx = 0.25 * cos(theta) - 1;  
+                goaly = 0.25 * sin(theta);
+                break;
+            default: //zoom on the cartoid
+                theta = 2*M_PI*((double)rand()/RAND_MAX); //Pick a random angle to zoom on
+                double r = (1 - cos(theta))/2;
+                goalx = r * cos(theta) + 0.25;  
+                goaly = r * sin(theta);
+        }
         beginTimer();
     }
-    double time = readTimer();
-    curx = (goalx - curx)/100*time + curx;
-    cury = (goaly - cury)/100*time + cury;
+    time = readTimer();
+    curx = (goalx - curx)/10*time + curx;
+    cury = (goaly - cury)/10*time + cury;
     glUniform2d(uCenter, curx, cury);
+
+    //load the time uniform
     glUniform1d(uTime, time);
+
+    //debug via the window tyle
     char title[30];
     sprintf(title, "%f", time);
     glfwSetWindowTitle(window, title);
 
+    //draw the window
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

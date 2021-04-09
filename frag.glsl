@@ -60,12 +60,12 @@ vec3 iterateMandelbrot(vec2 coord){
 }
 
 void main() {
-	dmat3 transOrigin = mat3(1, 0, 0, 0, 1, 0, -windowSize.x/2, -windowSize.y/2, 1); //center screen on (0, 0)
-	dmat3 scaleNorm = mat3(1/windowSize.x, 0, 0, 0, 1/windowSize.y, 0, 0, 0, 1); //scale screen to 1, 1
-	//dmat3 scaleTime = mat3(1/(2*time), 0, 0, 0, 1/(2*time), 0, 0, 0, 1);
-	dmat3 scaleBounds = mat3(3.5, 0, 0, 0, 2, 0, 0, 0, 1); //scale screen to 1, 1
-	dmat3 transCenter = mat3(1, 0, 0, 0, 1, 0, center.x, center.y, 1);
-	vec2 pos = vec3(transCenter*scaleBounds*scaleNorm*transOrigin*vec3(gl_FragCoord.xy,1)).xy;
-	FragColor = length(pos - center) < 0.05 ? vec4(255, 0, 0, 0.5) : vec4(iterateMandelbrot(pos), 1.0);
-	//FragColor = vec4(iterateMandelbrot(pos), 1.0);
+	dmat3 transOrigin = dmat3(1, 0, 0, 0, 1, 0, -windowSize.x/2, -windowSize.y/2, 1); //center screen on (0, 0)
+	dmat3 scaleNorm = dmat3(1/windowSize.x, 0, 0, 0, 1/windowSize.y, 0, 0, 0, 1); //scale screen to 1, 1
+	dmat3 scaleTime = dmat3(1/(time*time), 0, 0, 0, 1/(time*time), 0, 0, 0, 1);
+	dmat3 scaleBounds = dmat3(3.5, 0, 0, 0, 2, 0, 0, 0, 1); //scale screen to 1, 1
+	dmat3 transCenter = dmat3(1, 0, 0, 0, 1, 0, center.x, center.y, 1);
+	vec2 pos = vec3(transCenter*scaleBounds*scaleTime*scaleNorm*transOrigin*vec3(gl_FragCoord.xy,1)).xy;
+	//FragColor = length(pos - center) < 0.03 ? vec4(255, 0, 0, 0.5) : vec4(iterateMandelbrot(pos), 1.0);
+	FragColor = vec4(iterateMandelbrot(pos), 1.0);
 }
