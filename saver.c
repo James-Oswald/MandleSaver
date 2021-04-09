@@ -1,89 +1,40 @@
 
+
+#include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
-#include<time.h>
 #include<math.h>
 
 #define uint unsigned int
 
-uint loadShader(char* filename, uint shaderType){
-    FILE* file;
-    file = fopen(filename, "r");
-    fseek(file, 0, SEEK_END);
-    long fsize = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    char* glShaderCont = malloc(fsize + 1);
-    fread(glShaderCont, 1, fsize, file);
-    glShaderCont[fsize] = 0;
-    fclose(file);
+#include"shader.h"
+#include"window.h"
+#include"goodTime.h"
 
-    uint shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, (char const* const*)&glShaderCont, NULL);
-    glCompileShader(shader);
-    free(glShaderCont);
-    int success;
-    char infoLog[512];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if(!success){
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        printf("%s failed to compile with error:\n%s", filename, infoLog);
-        exit(1);
-    }
-    return shader;
-}
+GLFWwindow* window;
+clock_t begin;
+double curx = 0, cury = 0;
+double goalx = 0, goaly = 0;
+double zoom = 1, goalZoom = 1; 
+double time = 0;
+uint VAO, VBO, shaderProgram;
+uint uWinSize, uTime, uCenter;
 
-uint loadProgram(uint vertexShader, uint fragmentShader){
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    int success;
-    char infoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if(!success){
-        printf("failed to link program with error:\n%s", infoLog);
-        exit(1);
-    }
-    return shaderProgram;
-}
-
-void onResize(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
-int main(int argc, char** argv){
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    //glutFullScreen();
-    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "MandelBrot", monitor, NULL);
-    if (window == NULL){
-        printf("glfw Init failed");
-        glfwTerminate();
-        exit(1);
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, onResize);
-
-    GLenum err = glewInit();
-    if (err != GLEW_OK){
+void init(){
+    if(glewInit() != GLEW_OK){
         printf("GLEW DEAD");
         exit(1);
     }
-
-    uint VAO, VBO, shaderProgram;
     uint vertexShader = loadShader("vert.glsl", GL_VERTEX_SHADER);
     uint fragmentShader = loadShader("frag.glsl", GL_FRAGMENT_SHADER);
     shaderProgram = loadProgram(vertexShader, fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader); 
 
-    float vertices[] = {
+    //we need to make a quad covering the whole screen
+    float vertices[] = {    
         // first triangle
         1,  1,  // top right
         1, -1,  // bottom right
@@ -96,40 +47,57 @@ int main(int argc, char** argv){
 
     glGenBuffers(1, &VBO);  
     glGenVertexArrays(1, &VAO);  
-    
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0); 
 
-    int uWinSize = glGetUniformLocation(shaderProgram, "WindowSize");
-    int uTime = glGetUniformLocation(shaderProgram, "time");
+    uWinSize = glGetUniformLocation(shaderProgram, "windowSize");
+    uTime = glGetUniformLocation(shaderProgram, "time");
+    uCenter = glGetUniformLocation(shaderProgram, "center");
     glUseProgram(shaderProgram);
     
     glBindVertexArray(VAO);
-    clock_t begin = clock();
-    while(!glfwWindowShouldClose(window)){
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
-        glUniform2f(uWinSize, width, height);
-        glUniform1f(uTime, (clock() - begin) % CLOCKS_PER_SEC / (float)100000);
+}
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+void loop(){
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    glUniform2d(uWinSize, width, height);
+    if(time > 10){
+        double theta = 2*M_PI*rand()/RAND_MAX; //Pick a random theta
+        double r = (1 - cos(theta))/2;
+        goalx = r * cos(theta) + 0.25;
+        goaly = r * sin(theta);
+        beginTimer();
     }
+    double time = readTimer();
+    curx = (goalx - curx)/100*time + curx;
+    cury = (goaly - cury)/100*time + cury;
+    glUniform2d(uCenter, curx, cury);
+    glUniform1d(uTime, time);
+    char title[30];
+    sprintf(title, "%f", time);
+    glfwSetWindowTitle(window, title);
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader); 
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void cleanUp(){
     glDeleteProgram(shaderProgram);
     glfwTerminate();
+}
 
+
+int main(int argc, char** argv){
+    window = windowInit();
+    init();
+    windowLoop(window, loop);
+    cleanUp();
     return 0;
 }

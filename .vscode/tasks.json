@@ -9,6 +9,7 @@
                 "saver.c", 
                 "-lGL", 
                 "-lGLEW",
+                "-lglut",
                 "-lglfw",
                 "-lm"],
             "options": {

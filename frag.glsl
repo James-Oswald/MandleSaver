@@ -1,13 +1,12 @@
-#version 330 core
-
-precision highp float;
+#version 400
 
 in vec4 gl_FragCoord;
 
 out vec4 FragColor;
 
-uniform vec2 WindowSize;
-uniform float time;
+uniform dvec2 windowSize;
+uniform dvec2 center; 
+uniform double time;
 
 
 int maxIterations = 100;
@@ -51,14 +50,22 @@ vec2 cpow(vec2 z, float x){
 vec3 iterateMandelbrot(vec2 coord){
 	vec2 z = vec2(0, 0);
 	for(int i = 0; i < maxIterations; i++){
-		z = cpow(z, 10 * sin(0.5 * time) + 10) + coord;
-		if(length(z) > 2) 
-            return palette(float(i)/float(maxIterations));
+		z = cpow(z, 2) + coord;
+		if(length(z) > 2){
+			float color = float(i)/float(maxIterations);
+            return vec3(color, color, color);
+		}
 	}
 	return vec3(0, 0, 0);
 }
 
 void main() {
-    vec2 pos = mat2(3.5/WindowSize.x, 0, 0, 2/WindowSize.y) * gl_FragCoord.xy + vec2(sin(time) + -2.5, cos(time)-1);
-    FragColor = vec4(iterateMandelbrot(pos), 1.0);
+	dmat3 transOrigin = mat3(1, 0, 0, 0, 1, 0, -windowSize.x/2, -windowSize.y/2, 1); //center screen on (0, 0)
+	dmat3 scaleNorm = mat3(1/windowSize.x, 0, 0, 0, 1/windowSize.y, 0, 0, 0, 1); //scale screen to 1, 1
+	//dmat3 scaleTime = mat3(1/(2*time), 0, 0, 0, 1/(2*time), 0, 0, 0, 1);
+	dmat3 scaleBounds = mat3(3.5, 0, 0, 0, 2, 0, 0, 0, 1); //scale screen to 1, 1
+	dmat3 transCenter = mat3(1, 0, 0, 0, 1, 0, center.x, center.y, 1);
+	vec2 pos = vec3(transCenter*scaleBounds*scaleNorm*transOrigin*vec3(gl_FragCoord.xy,1)).xy;
+	FragColor = length(pos - center) < 0.05 ? vec4(255, 0, 0, 0.5) : vec4(iterateMandelbrot(pos), 1.0);
+	//FragColor = vec4(iterateMandelbrot(pos), 1.0);
 }
