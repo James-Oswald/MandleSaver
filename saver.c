@@ -26,7 +26,7 @@ double time = 0, lastTime = 0;
 uint VAO, VBO, shaderProgram;
 uint uWinSize, uTime, uCenter, uZoom;
 
-void init(){
+void saverInit(){
     //Init glew so we don't need to load GL funcs by ourselves
     if(glewInit() != GLEW_OK){
         printf("GLEW DEAD");
@@ -74,7 +74,7 @@ void init(){
     glBindVertexArray(VAO);
 }
 
-void loop(){
+void saverLoop(){
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -130,7 +130,7 @@ void loop(){
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void cleanUp(){
+void saverFree(){
     glDeleteProgram(shaderProgram);
     glfwTerminate();
 }
@@ -138,8 +138,8 @@ void cleanUp(){
 
 int main(int argc, char** argv){
     window = windowInit();
-    init();
-    windowLoop(window, loop);
-    cleanUp();
+    saverInit();
+    windowLoop(window, saverLoop);
+    saverFree();
     return 0;
 }
