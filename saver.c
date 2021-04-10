@@ -13,8 +13,8 @@
 #include"window.h"      //glfw helper functions
 #include"goodTime.h"    //custom timer
 
-const double jumpTime = 3;
-const double stayTime = 4;
+const double jumpTime = 2;
+const double stayTime = 3;
 const double zoomLevel = 30;
 
 GLFWwindow* window;
@@ -116,8 +116,8 @@ void loop(){
     //load the time uniform
 
     //This forumla is motivated graphically, see https://www.desmos.com/calculator/vqac7m1j8k
-    //double timeZoom = zoomLevel*sigmoid(-fabs((zoomLevel/(0.41*stayTime)) * (time - (jumpTime + stayTime/2.5))) + zoomLevel)+1;
-    double timeZoom = zoomLevel*sigmoid((zoomLevel/jumpTime) * (time - jumpTime)) + 1;
+    double timeZoom = zoomLevel*sigmoid(-fabs((zoomLevel/(0.41*stayTime)) * (time - (jumpTime + stayTime/2.5))) + zoomLevel)+1;
+    //double timeZoom = zoomLevel*sigmoid((zoomLevel/jumpTime) * (time - jumpTime)) + 1;
     glUniform1d(uZoom, timeZoom);
     glUniform1d(uTime, time);
 
