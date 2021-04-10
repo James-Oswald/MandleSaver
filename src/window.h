@@ -21,9 +21,9 @@ GLFWwindow* windowInit(){
 #ifdef FULLSCREEN
     GLFWmonitor* monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "MandelBrot", monitor, NULL);
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Mandelbrot", monitor, NULL);
 #else
-    GLFWwindow* window = glfwCreateWindow(500, 500, "MandelBrot", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(500, 500, "Mandelbrot", NULL, NULL);
 #endif
     if (window == NULL){
         printf("glfw Init failed");

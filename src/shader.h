@@ -7,6 +7,11 @@
 uint loadShader(char* filename, uint shaderType){
     FILE* file;
     file = fopen(filename, "r");
+    if(!file){
+        printf("Could not open %s\n", filename);
+        perror("Error:");
+        exit(1);
+    }
     fseek(file, 0, SEEK_END);
     long fsize = ftell(file);
     fseek(file, 0, SEEK_SET);

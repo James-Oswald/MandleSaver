@@ -34,8 +34,8 @@ void saverInit(){
     }
 
     //Shader program setup
-    uint vertexShader = loadShader("vert.glsl", GL_VERTEX_SHADER);
-    uint fragmentShader = loadShader("frag.glsl", GL_FRAGMENT_SHADER);
+    uint vertexShader = loadShader("./vert.glsl", GL_VERTEX_SHADER);
+    uint fragmentShader = loadShader("./frag.glsl", GL_FRAGMENT_SHADER);
     shaderProgram = loadProgram(vertexShader, fragmentShader);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader); 

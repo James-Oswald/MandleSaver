@@ -8,10 +8,10 @@
             "name": "gcc-9 - Build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/saver",
+            "program": "${workspaceFolder}/build/MandelSaver",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -22,7 +22,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "compileSaver",
+            "preLaunchTask": "buildScript",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

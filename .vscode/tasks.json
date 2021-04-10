@@ -5,8 +5,8 @@
             "command": "/usr/bin/gcc",
             "args": [
                 "-g",
-                "-osaver",
-                "saver.c", 
+                "-oMandelSaver",
+                "mandelSaver.c", 
                 "-lGL", 
                 "-lGLEW",
                 "-lglut",
@@ -18,6 +18,13 @@
             "problemMatcher": [
                 "$gcc"
             ],
+        },
+        {
+            "label":"buildScript",
+            "command": "./build.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
         }
     ],
     "version": "2.0.0"
