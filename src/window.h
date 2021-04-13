@@ -3,7 +3,7 @@
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
 
-#define FULLSCREEN
+//#define FULLSCREEN
 
 void onResize(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);

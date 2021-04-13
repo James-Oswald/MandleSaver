@@ -26,6 +26,8 @@ double time = 0, lastTime = 0;
 uint VAO, VBO, shaderProgram;
 uint uWinSize, uTime, uCenter, uZoom;
 
+int nanErrorCounter = 0;
+
 void saverInit(){
     //Init glew so we don't need to load GL funcs by ourselves
     if(glewInit() != GLEW_OK){
@@ -111,8 +113,16 @@ void saverLoop(){
     double deltat = time - lastTime;
     curx += (goalx-curx)/fabs(jumpTime - time)*deltat;
     cury += (goaly-cury)/fabs(jumpTime - time)*deltat; 
+    
+    if(isnan(curx) || isnan(cury)){ //if coincidently jumpTime == time and we're too close to our goal
+        time = jumpTime + stayTime;
+        cury = 0;
+        curx = 0;
+        nanErrorCounter++;
+        return;
+    }
+        
     glUniform2d(uCenter, curx, cury);
-
     //load the time uniform
 
     //This forumla is motivated graphically, see https://www.desmos.com/calculator/vqac7m1j8k
@@ -122,8 +132,8 @@ void saverLoop(){
     glUniform1d(uTime, time);
 
     //debug via the window tyle
-    char title[30];
-    sprintf(title, "%f", time);
+    char title[100];
+    sprintf(title, "time: %f, cur:(%f, %f), nanERC: %d", time, curx, cury, nanErrorCounter);
     glfwSetWindowTitle(window, title);
 
     //draw the window
