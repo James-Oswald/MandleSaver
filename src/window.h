@@ -3,7 +3,7 @@
 #include<GL/glew.h>
 #include<GLFW/glfw3.h>
 
-//#define FULLSCREEN
+#define FULLSCREEN
 
 void onResize(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
@@ -14,7 +14,12 @@ void onKeyPress(GLFWwindow* window, int key, int scancode, int action, int mods)
 }
 
 GLFWwindow* windowInit(){
-    glfwInit();
+    int err = glfwInit();
+    if (err == GLFW_FALSE){
+        printf("glfw init failed");
+        glfwTerminate();
+        exit(1);
+    }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -26,7 +31,7 @@ GLFWwindow* windowInit(){
     GLFWwindow* window = glfwCreateWindow(500, 500, "Mandelbrot", NULL, NULL);
 #endif
     if (window == NULL){
-        printf("glfw Init failed");
+        printf("glfw window create failed\n");
         glfwTerminate();
         exit(1);
     }
