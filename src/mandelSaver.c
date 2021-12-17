@@ -22,7 +22,7 @@ clock_t begin;
 double curx = 0, cury = 0;
 double goalx = 0, goaly = 0;
 double zoom = 1, goalZoom = 1; 
-double time = 0, lastTime = 0;
+double curTime = 0, lastTime = 0;
 uint VAO, VBO, shaderProgram;
 uint uWinSize, uTime, uCenter, uZoom;
 
@@ -87,7 +87,7 @@ void saverLoop(){
 
     //load the center uniform
     double theta;
-    if(time > jumpTime + stayTime){ //find a new center to zoom in on every few seconds
+    if(curTime > jumpTime + stayTime){ //find a new center to zoom in on every few seconds
         int selection = (int)(3*((double)rand()/RAND_MAX)); //select 1 of 3 interesting areas to zoom on
         switch(selection){
             case 0: //Zoom on the stem
@@ -105,17 +105,17 @@ void saverLoop(){
                 goalx = r * cos(theta) + 0.25;  
                 goaly = r * sin(theta);
         }
-        time = 0;
+        curTime = 0;
         beginTimer();
     }
-    lastTime = time;
-    time = readTimer();
-    double deltat = time - lastTime;
-    curx += (goalx-curx)/fabs(jumpTime - time)*deltat;
-    cury += (goaly-cury)/fabs(jumpTime - time)*deltat; 
+    lastTime = curTime;
+    curTime = readTimer();
+    double deltat = curTime - lastTime;
+    curx += (goalx-curx)/fabs(jumpTime - curTime)*deltat;
+    cury += (goaly-cury)/fabs(jumpTime - curTime)*deltat; 
     
     if(isnan(curx) || isnan(cury)){ //if coincidently jumpTime == time and we're too close to our goal
-        time = jumpTime + stayTime;
+        curTime = jumpTime + stayTime;
         cury = 0;
         curx = 0;
         nanErrorCounter++;
@@ -126,14 +126,14 @@ void saverLoop(){
     //load the time uniform
 
     //This forumla is motivated graphically, see https://www.desmos.com/calculator/vqac7m1j8k
-    double timeZoom = zoomLevel*sigmoid(-fabs((zoomLevel/(0.41*stayTime)) * (time - (jumpTime + stayTime/2.5))) + zoomLevel)+1;
+    double timeZoom = zoomLevel*sigmoid(-fabs((zoomLevel/(0.41*stayTime)) * (curTime - (jumpTime + stayTime/2.5))) + zoomLevel)+1;
     //double timeZoom = zoomLevel*sigmoid((zoomLevel/jumpTime) * (time - jumpTime)) + 1;
     glUniform1d(uZoom, timeZoom);
-    glUniform1d(uTime, time);
+    glUniform1d(uTime, curTime);
 
     //debug via the window tyle
     char title[100];
-    sprintf(title, "time: %f, cur:(%f, %f), nanERC: %d", time, curx, cury, nanErrorCounter);
+    sprintf(title, "time: %f, cur:(%f, %f), nanERC: %d", curTime, curx, cury, nanErrorCounter);
     glfwSetWindowTitle(window, title);
 
     //draw the window
